@@ -1,3 +1,4 @@
+
 String.format = function () {
     if (arguments.length == 0)
         return null;
