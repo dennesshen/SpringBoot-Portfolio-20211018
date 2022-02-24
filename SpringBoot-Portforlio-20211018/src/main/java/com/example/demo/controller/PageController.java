@@ -12,6 +12,11 @@ public class PageController {
 		return"classify.html";
 	}
 	
+	@RequestMapping("/tstock")
+	public String getTStockPage() {
+		return"TStock.html";
+	}
+	
 	@RequestMapping("/home")
 	public String getHomePage() {
 		return"home.html";

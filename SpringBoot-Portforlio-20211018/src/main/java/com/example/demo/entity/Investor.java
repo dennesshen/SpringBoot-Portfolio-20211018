@@ -24,6 +24,9 @@ public class Investor {
     private String username;
     
     @Column
+    private String password;
+    
+    @Column
     private String email;
     
     @Column
@@ -38,14 +41,6 @@ public class Investor {
     @JsonIgnoreProperties("investor")
     private Set<Watch> watchs;
     
-    public Investor() {
-    }
-
-    public Investor(String username, String password, String email, Integer balance) {
-        this.username = username;
-        this.email = email;
-        this.balance = balance;
-    }
     
     public Integer getId() {
         return id;

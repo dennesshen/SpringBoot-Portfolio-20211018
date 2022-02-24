@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th ="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>商品分類</title>
+	<th:block th:include="./include/header :: header"></th:block>
+	<script type="text/javascript">
+		$(document).ready(function() {// 為什麼要寫ready？？ 
+			// 新增的button 設定
+			$("#add").on("click", function() {
+				var jsonObj = $('#myform').serializeObject(); //這是來自util.js嗎? -> 對!!
+				var jsonStr = JSON.stringify(jsonObj);
+				console.log(jsonStr);
+				$.ajax({                                      //這是來自jquery的語法嗎？ -> 對
+					url: "/portfolio/tStock/add",
+					type: "POST",
+					contentType: "application/json;charset=utf-8",
+					data: jsonStr,
+					success: function(resp) {
+						console.log(JSON.stringify(resp));
+						initPageSetup() 
+					}
+				});
+			});
+			// 修改的button 設定
+			$("#update").on("click", function() {
+				var jsonObj = $('#myform').serializeObject(); 
+				var jsonStr = JSON.stringify(jsonObj);
+				console.log(jsonStr);
+				$.ajax({
+					url: "/portfolio/tStock/update",
+					type: "PUT",
+					contentType: "application/json;charset=utf-8",
+					data: jsonStr,
+					cache: false,
+					processData: true,
+					success: function(resp) {
+						console.log(JSON.stringify(resp));
+						initPageSetup(); 
+					}
+				});
+			});
+			
+			// 刪除的button 設定
+			$("#delete").on("click", function() {
+				var jsonObj = $('#myform').find("#id").val();
+				console.log(jsonObj);
+				$.ajax({
+					url: "/portfolio/tStock/delete",
+					type: "DELETE",
+					contentType: "application/json;charset=utf-8",
+					data: jsonObj,
+					success: function(resp) {
+						console.log(JSON.stringify(resp));
+						initPageSetup(); 
+					}
+				});
+			});
+			
+			//商品分類當中，按下任一列，可帶到上方修改
+			$("#myTable").on("click", "tr", function() {
+				var id = $(this).find('td').eq(0).text().trim();
+				console.log(id);
+				var url = "/portfolio/tStock/"+ id;
+				if (id != "") {
+					$.get(url, function(data, status) {
+						console.log(JSON.stringify(data))
+						$("#add").attr("disabled", true);
+						$("#update").attr("disabled", false);
+						$("#delete").attr("disabled", false);
+						
+						$("#myform").find("#id").val(data.id);
+						$("#myform").find("#name").val(data.name);
+						$("#myform").find("#symbol").val(data.symbol);
+						$("#myform").find("#classify_id").val(data.classify.id);
+					});
+				}
+			});
+			
+			$("#resetbutton").on("click", function() {
+				initPageSetup();
+			});
+			
+			initPageSetup() 
+		});
+		
+		function initPageSetup() {
+			$('#add').attr('disabled', false);
+			$('#update').attr('disabled', true);
+			$('#delete').attr('disabled', true);
+			$('#myform').trigger('reset'); 
+			table_list();
+			selectClassify_list()
+		};
+		
+		function selectClassify_list() {
+			$.get("/portfolio/classify/", function(datas, status) {
+				console.log(datas);
+				datas.map(function(data) {
+					$("#classify_id").append('<option value="'+data.id+'">'+data.name+'</option>');
+				});
+				
+			});
+		}
+		 
+		function table_list() {
+			$.get("/portfolio/tStock/", function(datas, status) { //怎麼知道叫做datas跟status，誰會去使用這個方法？
+				console.log(datas);
+				console.log(status);
+				//清除tbody內容
+				$("#myTable tbody > tr").remove(); 
+				//重新塞入tbody內容
+				$.each(datas, function(i, item) { 
+					var html = "<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td></tr>";
+					$("#myTable tbody").append(String.format(html, item.id, item.name, item.symbol, item.classify.name)); 
+				});
+				
+			});
+		};
+	</script>
+</head>
+<body>
+	<th:block th:include="./include/navbar :: navbar"></th:block>
+	
+	<div class="container">
+		<h1>TStock 股票、指數、匯率</h1>
+		<form id="myform" class="form-horizontal"> 
+			<div class="form-group">
+				<label class="col-sm-2 control-label">ID</label>
+				<div class="col-sm-5">
+					<input id="id" name="id" value="0" readonly="readonly" class="form-control"/>
+				</div>
+			</div>
+			
+			<div class="form-group">
+				<label class="col-sm-2 control-label">商品名稱</label>
+				<div class="col-sm-10">
+					<input id="name" name="name" placeholder="請輸入商品名稱" class="form-control"/>
+				</div>
+			</div>
+			
+			<div class="form-group">
+				<label class="col-sm-2 control-label">商品代號</label>
+				<div class="col-sm-10">
+					<input id="symbol" name="symbol" placeholder="請輸入商品代號" class="form-control"/>
+				</div>
+			</div>
+			
+			<div class="form-group">
+				<label class="col-sm-2 control-label">商品分類</label>
+				<div class="col-sm-10">
+					<select id="classify_id" name="classify_id" class="form-control"></select>
+				</div>
+			</div>
+			
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+						<button id="add" type="button" class="btn btn-success">新增</button>
+						<button id="update" type="button" class="btn btn-info">修改</button>
+						<button id="delete" type="button" class="btn btn-danger">刪除</button>
+						<button id="resetbutton" type="button" class="btn btn-warning">重置</button>
+				</div>
+			</div>
+		</form>
+		<p/>
+		
+		<h1>TStock 股票、指數、匯率</h1>
+		<table id="myTable" border="1" class="table table-striped table-responsive-md">
+			<thead>
+				<tr>
+					<th>id</th>
+					<th>name</th>
+					<th>symbol</th>
+					<th>classify_name</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+		
+	</div>
+	
+	<th:block th:include="./include/footer :: footer"></th:block>
+</body>
+</html>

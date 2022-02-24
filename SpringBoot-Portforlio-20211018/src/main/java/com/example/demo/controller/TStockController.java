@@ -15,50 +15,47 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.entity.Classify;
+import com.example.demo.entity.TStock;
 import com.example.demo.repository.ClassifyRepository;
+import com.example.demo.repository.TStockRepository;
 
 @RestController
-@RequestMapping("/classify")
-public class ClassifyController {
+@RequestMapping("/tStock")
+public class TStockController {
+	
+	@Autowired
+	private TStockRepository tStockRepository;
 	
 	@Autowired
 	private ClassifyRepository classifyRepository;
 	
 	@RequestMapping(value = {"/","/query"})
-	public List<Classify> query() {
-		return classifyRepository.findAll();
+	public List<TStock> query() {
+		return tStockRepository.findAll();
 	}
 	
 	@RequestMapping(value = "/{id}")
-	public Classify get(@PathVariable("id") Integer id) {
-		return classifyRepository.findById(id).get();
+	public TStock get(@PathVariable("id") Integer id) {
+		return tStockRepository.findById(id).get();
 	}
 	
 	@PostMapping(value = {"/", "/add"})
 	@Transactional
-	public Classify add(@RequestBody Map<String, String> map) {
-		Classify classify = new Classify();
-		classify.setName(map.get("name"));
-		if (map.get("tx") == null) {
-			classify.setTx(false);
-		}else {
-			classify.setTx(true);
-		}
-		classifyRepository.save(classify);
-		return classify;
+	public TStock add(@RequestBody Map<String, String> map) {
+		Classify classify = classifyRepository.findById(Integer.parseInt(map.get("classify_id"))).get();
+		TStock tStock = new TStock(map.get("symbol"), map.get("name"), classify);
+		tStockRepository.save(tStock);
+		return tStock;
 	}
 	
 	@PutMapping(value = {"/", "/update"})
 	@Transactional
 	public Boolean update(@RequestBody Map<String, String> map) {
-		Classify classify = classifyRepository.findById(Integer.parseInt(map.get("id") ) ).get();
-		classify.setName(map.get("name"));
-		if (map.get("tx") == null) {
-			classify.setTx(false);
-		}else {
-			classify.setTx(true);
-		}
-		classifyRepository.saveAndFlush(classify); // 什麼意思？
+		TStock tStock = tStockRepository.findById(Integer.parseInt(map.get("id") ) ).get();
+		Classify classify = classifyRepository.findById(Integer.parseInt(map.get("classify_id"))).get();
+		tStock.setName(map.get("name"));
+		tStock.setSymbol(map.get("symbol"));
+		tStock.setClassify(classify);
 		return true;
 	}
 	
@@ -66,8 +63,11 @@ public class ClassifyController {
 	@Transactional
 	public Boolean update(@RequestBody String id ) {
 		System.out.println("TEST---------------------");
-		classifyRepository.deleteById(Integer.parseInt(id)); 
+		tStockRepository.myDelete(Integer.parseInt(id));
+		//tStockRepository.delete(tStock);
+		//tStockRepository.deleteById(Integer.parseInt(id)); // 為什麼會出事呀？
 		System.out.println("TEST---------------------");
+
 		return true;
 	}
 	
