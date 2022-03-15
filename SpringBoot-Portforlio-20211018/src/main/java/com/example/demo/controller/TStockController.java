@@ -7,6 +7,7 @@ import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -29,7 +30,7 @@ public class TStockController {
 	@Autowired
 	private ClassifyRepository classifyRepository;
 	
-	@RequestMapping(value = {"/","/query"})
+	@GetMapping(value = {"/","/query"})
 	public List<TStock> query() {
 		return tStockRepository.findAll();
 	}
@@ -61,10 +62,9 @@ public class TStockController {
 	
 	@DeleteMapping(value = {"/", "/delete"})
 	@Transactional
-	public Boolean update(@RequestBody String id ) {
+	public Boolean delete(@RequestBody String id ) {
 		System.out.println("TEST---------------------");
 		tStockRepository.myDelete(Integer.parseInt(id));
-		//tStockRepository.delete(tStock);
 		//tStockRepository.deleteById(Integer.parseInt(id)); // 為什麼會出事呀？
 		System.out.println("TEST---------------------");
 
