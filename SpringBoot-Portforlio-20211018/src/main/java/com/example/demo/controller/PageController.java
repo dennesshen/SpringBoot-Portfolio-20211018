@@ -7,6 +7,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/page")
 public class PageController {
 	
+	@RequestMapping("/asset")
+	public String getAssetPage() {
+		return"asset.html";
+	}
+	
 	@RequestMapping("/watchlist")
 	public String getWatchListPage() {
 		return"watchlist.html";
